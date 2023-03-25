@@ -4,20 +4,33 @@ import { API } from "./global";
 
 export function Mentors() {
   const [mentor, setmentor] = useState();
+  const [student, setstudent] = useState();
 
-  useEffect(() => {
+  const mentorget = () => {
     fetch(`${API}/mentors`)
       .then((data) => data.json())
       .then((data) => setmentor(data));
-  }, []);
+  };
 
-  const [student, setstudent] = useState();
+  useEffect(() => mentorget(), []);
 
-  useEffect(() => {
+  const studentget = () => {
     fetch(`${API}/students`)
       .then((data) => data.json())
       .then((data) => setstudent(data));
-  }, []);
+  };
+
+  useEffect(() => studentget(), []);
+
+  async function deletstd(stdid) {
+    await fetch(`${API}/mentors/${stdid}`, {
+      method: "DELETE",
+    })
+      .then((data) => data.json())
+      .then((data) => console.log(data));
+    mentorget();
+    studentget();
+  }
 
   return (
     <div className="container">
@@ -39,6 +52,7 @@ export function Mentors() {
         <tbody>
           {mentor?.map((data, index) => (
             <Mentorlist
+              deletstd={deletstd}
               key={data._id}
               index={index}
               mentor={data}
@@ -50,7 +64,7 @@ export function Mentors() {
     </div>
   );
 }
-function Mentorlist({ mentor, student, index }) {
+function Mentorlist({ mentor, student, index, deletstd }) {
   const navigate = useNavigate();
   const [addstd, setaddstd] = useState([]);
 
@@ -69,67 +83,6 @@ function Mentorlist({ mentor, student, index }) {
   }
 
   return (
-    // <div className="mentor-list">
-    //   <div>
-    //     <h1> mentor </h1>
-    //   </div>
-
-    //   <h1>{mentor.mt_name}</h1>
-
-    //   <h1>{mentor.email}</h1>
-
-    //   <h1>{mentor.phone}</h1>
-
-    //   <h1>{mentor.department}</h1>
-
-    //   <div>
-    //     <div>
-    //       <button
-    //         onClick={() => addstudent(add, mentor._id)}
-    //         className="btn btn-primary"
-    //       >
-    //         add
-    //       </button>
-    //     </div>
-    //     <div className="btn-group">
-    // <button
-    //   type="button"
-    //   className="btn btn-primary"
-    //   data-bs-toggle="dropdown"
-    //   aria-expanded="false"
-    // >
-    //   select student
-    // </button>
-
-    // <span className="visually-hidden">Toggle Dropdown</span>
-
-    // <ul className="dropdown-menu">
-    //   {student?.map((ele) => {
-    //     return (
-    //       <li
-    //         key={ele._id}
-    //         onClick={() => {
-    //           setaddstd([ele]);
-    //           setadd(ele);
-    //         }}
-    //       >
-    //         <a className="dropdown-item" href="#">
-    //           {ele.st_name}
-    //         </a>
-    //       </li>
-    //     );
-    //   })}
-    // </ul>
-
-    //       <div>
-    //         {addstd?.map((ele) => {
-    //           return <div key={ele._id}> {ele.st_name}</div>;
-    //         })}
-    //       </div>
-    //     </div>
-    //   </div>
-    // </div>
-
     <tr key={mentor._id}>
       <th scope="row">{index + 1}</th>
       <td>
@@ -191,6 +144,14 @@ function Mentorlist({ mentor, student, index }) {
           >
             Add
           </button>
+          <div className="d-grid">
+            <button
+              onClick={() => deletstd(mentor._id)}
+              className="btn btn-danger"
+            >
+              Delete
+            </button>
+          </div>
         </div>
       </td>
     </tr>
